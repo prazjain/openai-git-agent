@@ -128,25 +128,3 @@ def create_file(local_dir, file_path, content):
             return f"Error creating file: {str(e)}"
     else:
         return f"Directory {local_dir} does not exist."
-
-def rename_file(local_dir, old_file_path, new_file_path):
-    """
-    Rename a file in a local repository.
-    
-    Args:
-        local_dir (str): The local directory of the repository.
-        old_file_path (str): The current path of the file to rename.
-        new_file_path (str): The new path of the file.
-    
-    Returns:
-        str: The status of the rename operation.
-    """
-    if os.path.exists(local_dir):
-        repo = Repo(local_dir)
-        try:
-            repo.git.mv(old_file_path, new_file_path)
-            return f"Renamed file from {old_file_path} to {new_file_path}."
-        except Exception as e:
-            return f"Error renaming file: {str(e)}"
-    else:
-        return f"Directory {local_dir} does not exist."

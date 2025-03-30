@@ -146,7 +146,13 @@ def commit_changes(local_dir, commit_message, files=[]):
             if files:
                 print('Adding files to commit ...')
                 print(files)
-                repo.index.add(files)
+                #need to remove ./ from file names as it is not recognized by git
+                for file in files:
+                    if file.startswith('./'):
+                        file = file[2:]
+                    print(f'Adding {file} to repo ...')
+                    repo.index.add(file)
+                #repo.index.add(files)
             
             repo.git.add(A=True)
             repo.git.commit(m=commit_message)
@@ -172,7 +178,8 @@ def push_changes(local_dir, branch_name):
             repo.git.push('origin', branch_name)
             return f"Pushed changes to branch {branch_name}."
         except Exception as e:
-            return f"Error pushing changes: {str(e)}"
+            print(f"Error pushing changes: {str(e)}")
+            raise e
     else:
         return f"Directory {local_dir} does not exist."
 def pull_changes(local_dir, branch_name):
@@ -386,21 +393,21 @@ def get_file_content(local_dir, file_path):
             return f"Error getting file content: {str(e)}"
     else:
         return f"Directory {local_dir} does not exist."
-def add_file(local_dir, file_path):
+def add_files(local_dir, file_paths):
     """
-    Add a new file to a local repository.
-    
-    Args:
-        local_dir (str): The local directory of the repository.
-        file_path (str): The path of the file to add.
-    
-    Returns:
-        str: The status of the add operation.
+    Add files to a local repository.
     """
     if os.path.exists(local_dir):
         repo = Repo(local_dir)
         try:
-            repo.git.add(file_path)
+            #need to remove ./ from file names as it is not recognized by git
+            for file_path in file_paths:
+                if file_path.startswith('./'):
+                    file_path = file_path[2:]
+                print(f'Adding {file_path} to repo ...')
+                repo.index.add(file_path)
+                repo.git.add(file_path)
+            repo.commit(m="Added files.")
             return f"Added file {file_path}."
         except Exception as e:
             return f"Error adding file: {str(e)}"
