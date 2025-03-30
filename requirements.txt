@@ -4,3 +4,4 @@ pydantic
 openai-agents
 PyGithub
 GitPython
+atlassian-python-api
