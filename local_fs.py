@@ -5,6 +5,11 @@ Operations related to local file system, get dir listing, fetch, update files et
 import os
 import fnmatch
 import shutil
+import logging 
+import logging_config
+
+logger = logging.getLogger(__name__)
+
 def parse_gitignore(root_dir):
         gitignore_path = os.path.join(root_dir, ".gitignore")
         if not os.path.exists(gitignore_path):
@@ -53,7 +58,7 @@ def write_file(file_path: str, content: str) -> str:
     try:
         with open(file_path, 'w') as f:
             f.write(content)
-        print(f"File {file_path} written successfully.")
+        logger.info(f"File {file_path} written successfully.")
         return ""
     except Exception as e:
         return f"Failed to write file: {str(e)}"
@@ -89,11 +94,11 @@ def delete_dir(path: str) -> str:
     if os.path.exists(path):
         try:
             shutil.rmtree(path)
-            print(f"Directory '{path}' and its contents have been deleted successfully.")
+            logger.info(f"Directory '{path}' and its contents have been deleted successfully.")
         except OSError as e:
-            print(f"Error deleting directory '{path}': {e}")
+            logger.error(f"Error deleting directory '{path}': {e}")
     else:
-        print(f"Directory '{path}' does not exist.")
+        logger.info(f"Directory '{path}' does not exist.")
 
 def generate_random_filename_uuid(prefix: str, suffix: str) -> str:
     """Generate a random filename."""

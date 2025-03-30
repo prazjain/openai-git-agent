@@ -7,6 +7,10 @@ It is assumed that the user has already authenticated with Bitbucket and has the
 '''
 import os
 from atlassian import Bitbucket
+import logging 
+import logging_config
+
+logger = logging.getLogger(__name__)
 
 def get_instance():
     """
@@ -21,7 +25,7 @@ def get_instance():
         )
         return bitbucket
     except Exception as e:
-        print(f"Error creating Bitbucket instance: {e}")
+        logger.error(f"Error creating Bitbucket instance: {e}")
         return None
 
 def get_repo(bitbucket, repo_slug):
@@ -35,7 +39,7 @@ def get_repo(bitbucket, repo_slug):
         repo = bitbucket.get_repo(repo_slug)
         return repo
     except Exception as e:
-        print(f"Error getting repository status: {e}")
+        logger.error(f"Error getting repository status: {e}")
         return None
     return None
 
@@ -50,10 +54,10 @@ def create_branch(bitbucket, repo_slug, branch_name, base_branch):
     """
     try:
         branch = bitbucket.create_branch(repo_slug, branch_name, base_branch)
-        print(f"Branch '{branch_name}' created successfully from '{base_branch}'")
+        logger.info(f"Branch '{branch_name}' created successfully from '{base_branch}'")
         return branch
     except Exception as e:
-        print(f"Error creating branch: {e}")
+        logger.error(f"Error creating branch: {e}")
         return None
     return None
 def delete_branch(bitbucket, repo_slug, branch_name):
@@ -66,9 +70,9 @@ def delete_branch(bitbucket, repo_slug, branch_name):
     """
     try:
         bitbucket.delete_branch(repo_slug, branch_name)
-        print(f"Branch '{branch_name}' deleted successfully")
+        logger.info(f"Branch '{branch_name}' deleted successfully")
     except Exception as e:
-        print(f"Error deleting branch: {e}")
+        logger.error(f"Error deleting branch: {e}")
         return None
     return None
 def get_repos(bitbucket, project_key):
@@ -82,7 +86,7 @@ def get_repos(bitbucket, project_key):
         repos = bitbucket.repo_list(project_key)
         return repos
     except Exception as e:
-        print(f"Error getting repositories: {e}")
+        logger.error(f"Error getting repositories: {e}")
         return None
     return None
 def open_pull_request(bitbucket, project, repo_slug, source_branch, target_branch, title, description):
@@ -105,9 +109,9 @@ def open_pull_request(bitbucket, project, repo_slug, source_branch, target_branc
                                     source_branch=source_branch,
                                     destination_branch=target_branch, 
                                     title=title, description=description)
-        print(f"Pull request '{title}' crceated successfully from '{source_branch}' to '{target_branch}'")
+        logger.info(f"Pull request '{title}' crceated successfully from '{source_branch}' to '{target_branch}'")
         return pr
     except Exception as e:
-        print(f"Error creating pull request: {e}")
+        logger.error(f"Error creating pull request: {e}")
         return None
     return None

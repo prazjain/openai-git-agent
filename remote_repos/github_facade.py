@@ -42,10 +42,11 @@ class GithubRepoFacade(RemoteRepoFacade):
         :param base: The base branch of the pull request.
         :return: The pull request object.
         """
-        return self.repo.create_pull(
+        pr = self.repo.create_pull(
             title=title,
             body=body,
             head=head,
             base=base,
         )
+        return pr.html_url
     

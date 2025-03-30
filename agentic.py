@@ -4,6 +4,10 @@ from agents import Agent, InputGuardrail,GuardrailFunctionOutput, Runner, ItemHe
 from pydantic import BaseModel
 import asyncio
 from dtos import CodeTask, CodeSolution, CodeFeedback
+import logging 
+import logging_config
+
+logger = logging.getLogger(__name__)
 
 python_coder_agent = Agent(
     model="o3-mini",
@@ -33,32 +37,28 @@ async def generate_solution(task_content: str) -> CodeSolution:
     reviewer_convo_history.append({"role": "user",
                                    "content": f"Task description : \n{task_content}",
                              })
-    print("Generating code ...")
+    logger.info("Generating code ...")
     code_solution = await Runner.run(python_coder_agent, coder_convo_history)
     #.final_output_as(CodeSolution)
-    print("Generated code.")
-    #print('Lets check code final output ...')
-    #print(code_solution.final_output.code)
-    #print(code_solution.final_output.description)
-    #print(code_solution.code)
+    logger.info("Generated code.")
     for i in range(1, max_iterations+1):
-        print(f"Iteration {i} of feedback..")
+        logger.info(f"Iteration {i} of feedback..")
         iteration = i
         reviewer_convo_history.append({"role": "user",
                                        "content": f"Please provide feedback on code solution {i} : \n{code_solution.final_output.code} ",
                                  })
         code_feedback = await Runner.run(reviewer_agent, reviewer_convo_history)
         #.final_output_as(CodeFeedback)
-        print("Received feedback")
+        logger.info("Received feedback")
         if code_feedback.final_output.refine_further:
-            print("Need further refinement.")
+            logger.info("Need further refinement.")
             coder_convo_history.append({"role": "user",
                                         "content": f"Please improve the code based on feedback : \n{code_feedback.final_output.feedback} "})
-            print("Refining code ...")
+            logger.info("Refining code ...")
             code_solution = await Runner.run(python_coder_agent, coder_convo_history)
             #.final_output_as(CodeSolution)
-            print("Refined code.")
+            logger.info("Refined code.")
         else:
-            print("Don't need further refinement.")
+            logger.info("Don't need further refinement.")
             break
     return code_solution, iteration

@@ -5,6 +5,10 @@ creating, deleting, and checking the status of repositories.
 '''
 import os
 from git import Repo
+import logging 
+import logging_config
+
+logger = logging.getLogger(__name__)
 
 def clone_repo(repo_url, local_dir, branch_name="main"):
     """
@@ -18,10 +22,10 @@ def clone_repo(repo_url, local_dir, branch_name="main"):
         Repo: The cloned repository object.
     """
     if os.path.exists(local_dir):
-        print(f"Directory {local_dir} already exists, choose new path for clone.")
+        logger.info(f"Directory {local_dir} already exists, choose new path for clone.")
         return None
     else:
-        print(f"Cloning repository from {repo_url} to {local_dir}.")
+        logger.info(f"Cloning repository from {repo_url} to {local_dir}.")
         repo = Repo.clone_from(repo_url, local_dir, branch=branch_name)
     
     return repo
@@ -32,10 +36,10 @@ def delete_repo(local_dir):
         local_dir (str): The local directory of the repository to delete.
     """
     if os.path.exists(local_dir):
-        print(f"Deleting repository at {local_dir}.")
+        logger.info(f"Deleting repository at {local_dir}.")
         os.rmdir(local_dir)
     else:
-        print(f"Directory {local_dir} does not exist.")
+        logger.info(f"Directory {local_dir} does not exist.")
 def check_repo_status(local_dir):
     """
     Check the status of a local repository.
@@ -144,13 +148,13 @@ def commit_changes(local_dir, commit_message, files=[]):
         repo = Repo(local_dir)
         try:
             if files:
-                print('Adding files to commit ...')
-                print(files)
+                logger.info('Adding files to commit ...')
+                logger.debug(files)
                 #need to remove ./ from file names as it is not recognized by git
                 for file in files:
                     if file.startswith('./'):
                         file = file[2:]
-                    print(f'Adding {file} to repo ...')
+                    logger.info(f'Adding {file} to repo ...')
                     repo.index.add(file)
                 #repo.index.add(files)
             
@@ -178,7 +182,7 @@ def push_changes(local_dir, branch_name):
             repo.git.push('origin', branch_name)
             return f"Pushed changes to branch {branch_name}."
         except Exception as e:
-            print(f"Error pushing changes: {str(e)}")
+            logger.error(f"Error pushing changes: {str(e)}")
             raise e
     else:
         return f"Directory {local_dir} does not exist."
@@ -404,7 +408,7 @@ def add_files(local_dir, file_paths):
             for file_path in file_paths:
                 if file_path.startswith('./'):
                     file_path = file_path[2:]
-                print(f'Adding {file_path} to repo ...')
+                logger.info(f'Adding {file_path} to repo ...')
                 repo.index.add(file_path)
                 repo.git.add(file_path)
             repo.commit(m="Added files.")
@@ -445,25 +449,25 @@ def move_files(local_dir, src_file_paths, dest_file_paths):
     Returns:
         str: The status of the move operation.
     """
-    print(f'Checking if directory {local_dir} exists ...')
+    logger.info(f'Checking if directory {local_dir} exists ...')
     if os.path.exists(local_dir):
         repo = Repo(local_dir)
-        print(f'Working directory for git mv cmd : {repo.git.working_dir}')
-        #print(f'Checking if files exist ...')
+        logger.info(f'Working directory for git mv cmd : {repo.git.working_dir}')
+        #logger.info(f'Checking if files exist ...')
         try:
             for src, dest in zip(src_file_paths, dest_file_paths):
-                print(f'Moving {src} to {dest}')    
+                logger.info(f'Moving {src} to {dest}')    
                 repo.git.mv(src, dest)
             repo.index.add(dest_file_paths)
             # not adding commit here, as next step is commit in main program
             repo.git.commit(m="Moved files.")
-            print('Moved files')
+            logger.info('Moved files')
             return "Moved files."
                 #os.rename(os.path.join(local_dir, src), os.path.join(local_dir, dest))
             return "Moved files."
         except Exception as e:
-            print(f"Error moving files: {str(e)}")
+            logger.error(f"Error moving files: {str(e)}")
             raise e
     else:
-        print(f'Directory {local_dir} does not exist.')
+        logger.info(f'Directory {local_dir} does not exist.')
         return f"Directory {local_dir} does not exist."

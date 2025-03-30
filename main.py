@@ -8,6 +8,10 @@ import local_repo
 import local_fs
 
 import agentic
+import logging 
+import logging_config
+
+logger = logging.getLogger(__name__)
 
 load_dotenv()
 github_token = os.getenv("GITHUB_TOKEN")
@@ -42,35 +46,35 @@ def main():
     task_file = task_files[0]
     task_description, error = local_fs.read_file(os.path.join('.', 'agent-task', task_file))
     if error:
-        print(error)
+        logger.error(error)
         return
     code_solution, iteration = run_agent(task_description, mock=True)
-    #print(code_solution.final_output.code)
+    #logger.debug(code_solution.final_output.code)
     
     solution_branch_name = solution_branch_name.replace("#iteration", str(iteration))
     solution_branch_head = local_repo.create_branch(local_dir=local_repo_dir,branch_name=solution_branch_name)
 
     local_fs.write_file(os.path.join('agent-task', solution_file_path), code_solution)
-    print(f'About to add solution file to repo {solution_file_path} ...')
+    logger.debug(f'About to add solution file to repo {solution_file_path} ...')
     local_repo.add_files(local_dir=local_repo_dir, file_paths=[solution_file_path])
-    print('Added solution file to repo ...')
+    logger.debug('Added solution file to repo ...')
     task_file_dest = task_file.replace("genai-todo", "genai-completed")
-    print(task_file_dest)
+    logger.debug(task_file_dest)
     import pathlib
     pathlib.Path(os.path.join('.', 'agent-task', task_file_dest)).parent.mkdir(parents=True, exist_ok=True)
     local_repo.move_files(local_dir=local_repo_dir, src_file_paths=[task_file], dest_file_paths=[task_file_dest])
     local_repo.commit_changes(local_dir=local_repo_dir, commit_message=f"Add solution for task {iteration}", files=[solution_file_path])
     local_repo.push_changes(local_dir=local_repo_dir, branch_name=solution_branch_name)
     
-    print(f"Pushed solution to branch {solution_branch_name}")
+    logger.info(f"Pushed solution to branch {solution_branch_name}")
 
-    ghub_repo.create_pull_request(
+    pr_url = ghub_repo.create_pull_request(
         title=f"Add solution for task {iteration}",
         body="This PR adds the solution for the task.",
         head=solution_branch_name,
         base=start_branch_name,
     )
-    print(f"Pull request created for branch {solution_branch_name}")
+    logger.info(f"Pull request created for branch {solution_branch_name} {pr_url}")
 
 if __name__ == "__main__":
     main()

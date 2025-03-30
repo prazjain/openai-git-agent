@@ -7,6 +7,11 @@ It is assumed that the user has already authenticated with Github and has the ne
 '''
 from github import Github
 import os
+import logging 
+import logging_config
+
+logger = logging.getLogger(__name__)
+
 def get_instance():
     """
     Get a Github instance.
@@ -18,7 +23,7 @@ def get_instance():
         )
         return github
     except Exception as e:
-        print(f"Error creating Github instance: {e}")
+        logger.error(f"Error creating Github instance: {e}")
         return None
 def get_repo(github, repo_name):
     """
@@ -31,7 +36,7 @@ def get_repo(github, repo_name):
         repo = github.get_repo(repo_name)
         return repo
     except Exception as e:
-        print(f"Error getting repository status: {e}")
+        logger.error(f"Error getting repository status: {e}")
         return None
     return None
 def create_branch(github, repo_name, branch_name, base_branch):
@@ -47,9 +52,9 @@ def create_branch(github, repo_name, branch_name, base_branch):
         repo = github.get_repo(repo_name)
         base = repo.get_branch(base_branch)
         repo.create_git_ref(ref='refs/heads/' + branch_name, sha=base.commit.sha)
-        print(f"Branch '{branch_name}' created successfully from '{base_branch}'")
+        logger.info(f"Branch '{branch_name}' created successfully from '{base_branch}'")
     except Exception as e:
-        print(f"Error creating branch: {e}")
+        logger.error(f"Error creating branch: {e}")
         return None
     return None
 def delete_branch(github, repo_name, branch_name):
@@ -64,9 +69,9 @@ def delete_branch(github, repo_name, branch_name):
         repo = github.get_repo(repo_name)
         ref = repo.get_git_ref('heads/' + branch_name)
         ref.delete()
-        print(f"Branch '{branch_name}' deleted successfully")
+        logger.info(f"Branch '{branch_name}' deleted successfully")
     except Exception as e:
-        print(f"Error deleting branch: {e}")
+        logger.error(f"Error deleting branch: {e}")
         return None
     return None
 def get_repos(github):
@@ -79,7 +84,7 @@ def get_repos(github):
         repos = github.get_user().get_repos()
         return repos
     except Exception as e:
-        print(f"Error getting repositories: {e}")
+        logger.error(f"Error getting repositories: {e}")
         return None
     return None
 def create_pull_request(github, repo_name, title, body, head, base):
@@ -98,5 +103,5 @@ def create_pull_request(github, repo_name, title, body, head, base):
         pr = repo.create_pull(title=title, body=body, head=head, base=base)
         return pr
     except Exception as e:
-        print(f"Error creating pull request: {e}")
+        logger.error(f"Error creating pull request: {e}")
         return None
