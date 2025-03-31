@@ -1,4 +1,4 @@
-
+import logging
 import asyncio
 import os
 from dotenv import load_dotenv
@@ -8,9 +8,6 @@ import local_repo
 import local_fs
 
 import agentic
-import logging 
-import logging_config
-
 logger = logging.getLogger(__name__)
 
 load_dotenv()
@@ -25,7 +22,7 @@ def run_agent(task_description, mock=False):
     return code_solution.final_output.code, iteration
 
 def get_mock_output():
-    content, error = local_fs.read_file(os.path.join(os.getcwd(), "agent-task", "mock", "solution.py"))
+    content, _ = local_fs.read_file(os.path.join(os.getcwd(), "agent-task", "mock", "solution.py"))
     return content, 1
 
 def main():
@@ -39,7 +36,9 @@ def main():
     ghub_repo = github_facade.GithubRepoFacade(repo_name=start_repo_name)
 
     local_fs.delete_dir(local_repo_dir)
-    local_repo_obj = local_repo.clone_repo(ghub_repo.get_repo().clone_url, local_repo_dir, branch_name=start_branch_name)
+    clone_url = ghub_repo.get_repo().clone_url
+    local_repo.clone_repo(clone_url, local_repo_dir
+                          , branch_name=start_branch_name)
 
     src_files, task_files = local_fs.get_src_and_task_files(local_repo_dir)
 
@@ -52,7 +51,7 @@ def main():
     #logger.debug(code_solution.final_output.code)
     
     solution_branch_name = solution_branch_name.replace("#iteration", str(iteration))
-    solution_branch_head = local_repo.create_branch(local_dir=local_repo_dir,branch_name=solution_branch_name)
+    local_repo.create_branch(local_dir=local_repo_dir,branch_name=solution_branch_name)
 
     local_fs.write_file(os.path.join('agent-task', solution_file_path), code_solution)
     logger.debug(f'About to add solution file to repo {solution_file_path} ...')

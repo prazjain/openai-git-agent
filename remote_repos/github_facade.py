@@ -16,7 +16,7 @@ class GithubRepoFacade(RemoteRepoFacade):
         self.github = githubrepo.get_instance()
         self.repo = githubrepo.get_repo(self.github, repo_name=repo_name)
         super().__init__(repo_name)
-    
+
     def get_repo(self):
         """
         Get the repository.
